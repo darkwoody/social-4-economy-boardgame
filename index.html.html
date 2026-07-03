@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경제 선택 탐험대 - 4학년 사회 3단원 경제활동과 합리적 선택</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap');
+        .font-jua { font-family: 'Jua', sans-serif; }
+        .font-nanum { font-family: 'Nanum Gothic', sans-serif; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-nanum min-h-screen select-none overflow-x-hidden">
+
+    <!-- 30분 타이머 & 대시보드 상단바 -->
+    <header class="bg-slate-800 border-b border-slate-700 py-3 px-6 sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-cyan-500 to-indigo-600 p-2 rounded-lg text-white shadow-inner">
+                    <i class="fa-solid fa-compass-drafting text-xl animate-spin-slow"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-jua tracking-wide text-cyan-400">경제 선택 탐험대 : 합리적 선택 지도</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">초등 4-1 사회 3단원 경제활동과 합리적 선택</p>
+                </div>
+            </div>
+            
+            <!-- 타이머 및 턴 표시 -->
+            <div class="flex items-center gap-4">
+                <div class="bg-slate-950 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-2 shadow-inner">
+                    <i class="fa-solid fa-stopwatch text-rose-500 animate-pulse"></i>
+                    <span class="text-sm text-slate-400">남은 시간:</span>
+                    <span id="global-timer" class="font-bold text-lg text-rose-400 font-mono">30:00</span>
+                </div>
+                <button onclick="openResetConfirmModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-2 rounded-lg text-xs transition duration-200">
+                    <i class="fa-solid fa-arrow-rotate-left mr-1"></i>처음부터
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-24">
+        
+        <!-- 대기실 / 게임 설정 스크린 -->
+        <section id="setup-screen" class="lg:col-span-12 max-w-2xl mx-auto w-full bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl mt-8">
+            <div class="text-center mb-8">
+                <span class="bg-cyan-500/10 text-cyan-400 text-xs font-bold px-3 py-1 rounded-full border border-cyan-500/20">오프라인 모둠용 (한 대의 웨일북으로 진행)</span>
+                <h2 class="text-3xl font-jua text-white mt-3">선택 탐험가 등록</h2>
+                <p class="text-slate-400 mt-2 text-sm">4명의 모둠원이 차례대로 한 대의 웨일북을 터치해가며 진행하는 보드게임입니다.<br>총 30분 동안 진행하며, 가장 많은 선택 토큰을 모은 탐험가가 승리합니다.</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- 참여 인원 안내 -->
+                <div class="bg-slate-900/70 border border-cyan-500/20 rounded-xl p-4">
+                    <label class="block text-slate-300 font-bold mb-2 text-sm">참여 인원</label>
+                    <div class="py-3 rounded-xl border-2 border-cyan-500 bg-cyan-950/30 text-cyan-300 font-bold text-lg text-center">
+                        4명 모둠 고정
+                    </div>
+                </div>
+
+                <!-- 플레이어 이름 및 아바타 설정 -->
+                <div id="player-inputs" class="space-y-4">
+                    <!-- Dynamic generation via JS -->
+                </div>
+
+                <!-- 게임 시작 버튼 -->
+                <button onclick="startGame()" class="w-full bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-jua text-2xl py-4 rounded-xl shadow-lg transform active:scale-95 transition duration-200 mt-4">
+                    경제 선택 탐험 시작
+                </button>
+            </div>
+        </section>
+
+        <!-- 메인 게임 영역 (설정 완료 후 노출) -->
+        <section id="game-screen" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+            
+            <!-- 왼쪽: 보드판 영역 (lg:col-span-8) -->
+            <div class="lg:col-span-8 flex flex-col gap-4">
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-jua text-cyan-300 flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot"></i>경제활동 보드맵 (S자형)
+                        </h3>
+                        <span class="text-xs text-slate-400">출발부터 S자 방향으로 이동하며 경제 개념 미션을 해결합니다.</span>
+                    </div>
+
+                    <!-- 보드판 그리드 (6열 x 4행) -->
+                    <div id="board-grid" class="grid grid-cols-6 gap-2 sm:gap-3 bg-slate-900 p-2 sm:p-3 rounded-xl border border-slate-700 overflow-hidden">
+                        <!-- Dynamic generated tiles via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 게임 상태 및 컨트롤러 (lg:col-span-4) -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <!-- 현재 차례 상태판 -->
+                <div class="bg-gradient-to-b from-slate-800 to-slate-850 border border-slate-700 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl"></div>
+                    
+                    <span class="bg-indigo-500/20 text-indigo-400 text-xs font-bold px-2.5 py-1 rounded-full border border-indigo-500/20">ACTIVE EXPLORER</span>
+                    
+                    <div id="active-player-panel" class="mt-4 flex items-center gap-4">
+                        <!-- JS에서 실시간 갱신 -->
+                    </div>
+
+                    <!-- 주사위 굴리기 컨트롤러 -->
+                    <div class="mt-6 p-4 bg-slate-900/80 border border-slate-700/50 rounded-xl text-center">
+                        <div id="dice-container" class="h-24 flex items-center justify-center mb-4">
+                            <!-- 주사위 비주얼 -->
+                            <div id="dice-visual" class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-indigo-500/20 cursor-not-allowed">
+                                <i class="fa-solid fa-dice-d6 animate-pulse"></i>
+                            </div>
+                        </div>
+                        <button id="btn-roll-dice" onclick="rollDice()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-jua text-xl py-3 rounded-lg shadow-md transform active:scale-95 transition duration-150">
+                            주사위 굴리기 (1～4 칸 이동)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 전체 탐험가 상태 스코어보드 -->
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg">
+                    <h3 class="text-md font-jua text-slate-300 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-ranking-star text-amber-400"></i>선택 탐험대 스코어보드
+                    </h3>
+                    <div id="scoreboard-list" class="space-y-3">
+                        <!-- JS에서 채워짐 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 문제 카드 모달 (풀이 전용 창) -->
+    <div id="problem-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-zoom-in">
+            <!-- 모달 상단 헤더 -->
+            <div class="bg-slate-700/50 px-6 py-4 border-b border-slate-600 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span id="problem-badge" class="bg-rose-500/20 text-rose-400 text-xs font-bold px-2.5 py-1 rounded-full border border-rose-500/25"></span>
+                    <h4 id="problem-title" class="font-jua text-lg text-white">경제활동 선택 카드</h4>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-slate-400">제한시간:</span>
+                    <span id="question-timer" class="font-bold font-mono text-amber-400 text-lg bg-slate-900 px-3 py-1 rounded-md">90초</span>
+                </div>
+            </div>
+
+            <!-- 모달 콘텐츠 본문 (스크롤 가능) -->
+            <div class="p-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-12 gap-6">
+                <!-- 왼쪽: 문제 내용 및 보기 선택지 (md:col-span-7) -->
+                <div class="md:col-span-7 flex flex-col justify-between space-y-6">
+                    <!-- 문제 지문 -->
+                    <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-700/50">
+                        <p id="problem-text" class="text-base md:text-lg text-slate-100 leading-relaxed font-semibold">
+                            <!-- JS를 통해 문제 글이 출력됨 -->
+                        </p>
+                    </div>
+
+                    <!-- 사지선다 보기 리스트 -->
+                    <div class="space-y-3">
+                        <p class="text-xs text-cyan-400 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-info"></i>가장 알맞은 답을 1개 선택하세요.
+                        </p>
+                        <div id="options-container" class="grid grid-cols-1 gap-3">
+                            <!-- JS에서 4개 버튼을 동적으로 생성 -->
+                        </div>
+                    </div>
+
+                    <!-- 사용 가능한 아이템 목록 -->
+                    <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-700/50">
+                        <p class="text-xs font-bold text-slate-400 mb-2">탐험 아이템 사용하기 (턴당 1회)</p>
+                        <div id="use-item-container" class="flex flex-wrap gap-2">
+                            <!-- JS에서 보물 아이템 주입 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 내장 스크래치패드 (그림 연습장) (md:col-span-5) -->
+                <div class="md:col-span-5 flex flex-col bg-slate-900 p-4 rounded-xl border border-slate-700">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-pencil"></i>선택 근거 메모장
+                        </span>
+                        <div class="flex gap-1.5">
+                            <button onclick="clearCanvas()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded transition">
+                                <i class="fa-solid fa-trash-can mr-1"></i>비우기
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 캔버스 그리기 영역 -->
+                    <div class="relative bg-white rounded-lg overflow-hidden flex-1 min-h-[220px]">
+                        <canvas id="scratchpad-canvas" class="w-full h-full cursor-crosshair"></canvas>
+                    </div>
+
+                    <!-- 그리기 도구 패널 -->
+                    <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-800">
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="setBrushColor('#1e293b')" class="w-6 h-6 rounded-full bg-slate-800 border-2 border-white ring-2 ring-slate-900 focus:outline-none"></button>
+                            <button onclick="setBrushColor('#ef4444')" class="w-6 h-6 rounded-full bg-red-500 hover:scale-105 transition"></button>
+                            <button onclick="setBrushColor('#3b82f6')" class="w-6 h-6 rounded-full bg-blue-500 hover:scale-105 transition"></button>
+                            <button onclick="setBrushColor('#10b981')" class="w-6 h-6 rounded-full bg-emerald-500 hover:scale-105 transition"></button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-slate-400">굵기</label>
+                            <input type="range" min="1" max="10" value="3" onchange="setBrushWidth(this.value)" class="w-20 accent-cyan-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 리포트 & 시상식 모달 -->
+    <div id="result-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-amber-500/50 rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl overflow-hidden animate-zoom-in text-center relative">
+            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl"></div>
+            
+            <i class="fa-solid fa-crown text-6xl text-amber-400 mb-4 animate-bounce"></i>
+            <h2 class="text-3xl font-jua text-white">탐험 완료! 합리적 선택가 시상식</h2>
+            <p class="text-slate-400 text-sm mt-1">30분간의 경제활동 선택 탐험이 모두 종료되었습니다!</p>
+
+            <!-- 순위 리스트 -->
+            <div id="final-rankings" class="my-8 space-y-4 max-w-md mx-auto">
+                <!-- JS에서 순위 렌더링 -->
+            </div>
+
+            <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-700 mb-6 text-left max-w-md mx-auto">
+                <h5 class="text-xs font-bold text-slate-400 mb-1">모둠 성과 피드백</h5>
+                <p class="text-sm text-slate-300">합리적 선택을 할 때는 필요, 예산, 선택 기준, 정보의 출처를 함께 확인하는 연습을 계속해 보세요!</p>
+            </div>
+
+            <button onclick="location.reload()" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-jua text-xl px-8 py-3 rounded-xl shadow-lg hover:scale-105 transition duration-150">
+                새 탐험 시작하기
+            </button>
+        </div>
+    </div>
+
+    <!-- 팝업 다이얼로그 (Alert 대신 사용) -->
+    <div id="dialog-overlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-50 p-4 hidden">
+        <div id="dialog-box" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-xl text-center transform scale-95 transition-all duration-200">
+            <div id="dialog-icon" class="text-4xl mb-3"></div>
+            <h4 id="dialog-title" class="font-jua text-xl text-white">알림</h4>
+            <p id="dialog-desc" class="text-slate-300 mt-2 text-sm whitespace-pre-wrap"></p>
+            <div class="mt-6 flex justify-center gap-3">
+                <button id="dialog-btn-primary" onclick="closeDialog()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-6 py-2.5 rounded-lg text-sm shadow transition duration-150">확인</button>
+                <button id="dialog-btn-secondary" onclick="closeDialog()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold px-6 py-2.5 rounded-lg text-sm shadow transition duration-150 hidden">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 주사위 굴리는 중 오버레이 -->
+    <div id="dice-rolling-overlay" class="fixed inset-0 bg-slate-950/60 flex items-center justify-center z-50 hidden">
+        <div class="bg-slate-800 border border-slate-700 p-8 rounded-2xl text-center flex flex-col items-center gap-4 shadow-xl">
+            <div class="text-6xl text-cyan-400 animate-spin">
+                <i class="fa-solid fa-dice"></i>
+            </div>
+            <p id="rolling-text" class="text-lg font-jua text-slate-300">주사위 굴리는 중...</p>
+        </div>
+    </div>
+
+    <script>
+        // --- SOUND SYNTHESIS USING WEB AUDIO API ---
+        const sound = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playDice() {
+                this.init();
+                let now = this.ctx.currentTime;
+                for (let i = 0; i < 6; i++) {
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(200 + i * 80, now + i * 0.04);
+                    gain.gain.setValueAtTime(0.08, now + i * 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.04 + 0.03);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.04);
+                    osc.stop(now + i * 0.04 + 0.03);
+                }
+            },
+            playSuccess() {
+                this.init();
+                let now = this.ctx.currentTime;
+                let notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+                    gain.gain.setValueAtTime(0.08, now + idx * 0.07);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.07 + 0.12);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.07);
+                    osc.stop(now + idx * 0.07 + 0.12);
+                });
+            },
+            playFailure() {
+                this.init();
+                let now = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.25);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            },
+            playItem() {
+                this.init();
+                let now = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(350, now);
+                osc.frequency.exponentialRampToValueAtTime(700, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+        };
+
+        // --- GAME DATA: 27 QUESTIONS FROM THE PDF ---
+        const questionBank = [
+            {
+                        "id": 1,
+                        "level": "normal",
+                        "title": "경제활동의 의미",
+                        "text": "다음 중 경제활동의 의미로 가장 알맞은 것은 무엇일까요?",
+                        "options": [
+                                    "생활에 필요한 것을 만들고, 사고팔거나 사용하는 모든 활동",
+                                    "운동장에서 친구들과 놀이하는 활동만 뜻함",
+                                    "학교 규칙을 정하고 지키는 모든 활동",
+                                    "날씨와 자연환경을 관찰하는 활동"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "경제활동은 생활에 필요한 것을 만들어 내고, 이것을 사고팔거나 사용하는 것과 관련 있는 모든 활동입니다."
+            },
+            {
+                        "id": 2,
+                        "level": "normal",
+                        "title": "경제활동 찾기",
+                        "text": "다음 중 경제활동에 해당하는 사례를 고르세요.",
+                        "options": [
+                                    "빵집에서 빵을 사 먹는다",
+                                    "집에서 잠을 잔다",
+                                    "운동장에서 술래잡기를 한다",
+                                    "하늘의 구름 모양을 관찰한다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "물건을 사고 사용하는 활동은 경제활동에 해당합니다."
+            },
+            {
+                        "id": 3,
+                        "level": "normal",
+                        "title": "사용의 의미",
+                        "text": "경제활동은 생활에 필요한 것을 만들고 사고팔거나 무엇 하는 활동과 관련 있을까요?",
+                        "options": [
+                                    "사용하는 활동",
+                                    "숨기는 활동",
+                                    "버리는 활동",
+                                    "멈추는 활동"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "경제활동에는 생활에 필요한 것을 만들어 내는 일, 사고파는 일, 사용하는 일이 포함됩니다."
+            },
+            {
+                        "id": 4,
+                        "level": "normal",
+                        "title": "자원의 희소성",
+                        "text": "사람들의 필요나 욕구에 비해 자원이 부족한 상태를 무엇이라고 할까요?",
+                        "options": [
+                                    "자원의 희소성",
+                                    "자원의 풍부함",
+                                    "자원의 이동성",
+                                    "자원의 장식성"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "자원의 희소성은 사람들의 필요나 욕구에 비해 자원이 부족한 상태를 말합니다."
+            },
+            {
+                        "id": 5,
+                        "level": "normal",
+                        "title": "선택의 문제",
+                        "text": "경제활동에서 선택의 문제가 일어나는 가장 큰 까닭은 무엇일까요?",
+                        "options": [
+                                    "자원의 희소성 때문",
+                                    "사람들이 모두 같은 물건만 좋아하기 때문",
+                                    "물건의 이름이 어렵기 때문",
+                                    "가게가 항상 가까이 있기 때문"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "자원이 한정되어 있기 때문에 무엇을 선택할지 선택 토큰해야 하는 문제가 생깁니다."
+            },
+            {
+                        "id": 6,
+                        "level": "normal",
+                        "title": "합리적 선택",
+                        "text": "합리적 선택의 의미로 알맞은 것을 고르세요.",
+                        "options": [
+                                    "적은 비용과 노력으로 가장 큰 만족감을 얻는 선택",
+                                    "가장 비싼 물건을 고르는 선택",
+                                    "친구가 산 물건을 무조건 따라 사는 선택",
+                                    "광고에 가장 많이 나온 물건을 고르는 선택"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "합리적 선택은 경제활동에서 적은 비용과 노력으로 가장 큰 만족감을 얻을 수 있는 선택입니다."
+            },
+            {
+                        "id": 7,
+                        "level": "normal",
+                        "title": "합리적 선택이 필요한 까닭",
+                        "text": "합리적 선택이 필요한 까닭으로 알맞지 않은 것은 무엇일까요?",
+                        "options": [
+                                    "돈과 시간을 마음대로 낭비할 수 있기 때문",
+                                    "큰 만족감을 얻을 수 있기 때문",
+                                    "한정된 자원을 절약할 수 있기 때문",
+                                    "필요한 물건을 더 잘 고를 수 있기 때문"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "합리적 선택은 돈과 시간 등 한정된 자원을 아끼고 더 큰 만족감을 얻기 위해 필요합니다."
+            },
+            {
+                        "id": 8,
+                        "level": "normal",
+                        "title": "구매 전 확인할 점",
+                        "text": "물건을 사기 전에 가장 먼저 생각해 볼 내용으로 알맞은 것은 무엇일까요?",
+                        "options": [
+                                    "나에게 꼭 필요한 물건인지 생각한다",
+                                    "포장 색깔만 보고 고른다",
+                                    "친구가 샀는지만 확인한다",
+                                    "광고 문구를 그대로 믿는다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "물건을 살 때는 먼저 나에게 꼭 필요한지, 내가 가진 돈으로 살 수 있는지 생각해야 합니다."
+            },
+            {
+                        "id": 9,
+                        "level": "normal",
+                        "title": "예산 확인",
+                        "text": "합리적 선택을 위해 내가 가진 돈으로 살 수 있는지 확인하는 까닭은 무엇일까요?",
+                        "options": [
+                                    "한정된 돈을 계획적으로 쓰기 위해서",
+                                    "물건을 무조건 많이 사기 위해서",
+                                    "가장 큰 물건만 고르기 위해서",
+                                    "가격을 보지 않고 고르기 위해서"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "돈은 한정된 자원이므로 예산 안에서 필요한 물건을 고르는 것이 중요합니다."
+            },
+            {
+                        "id": 10,
+                        "level": "normal",
+                        "title": "선택 기준 세우기",
+                        "text": "물건을 고를 때 기준으로 삼을 수 있는 것을 모두 바르게 묶은 것은 무엇일까요?",
+                        "options": [
+                                    "가격, 품질, 디자인, 서비스",
+                                    "색깔, 소문, 운, 자리",
+                                    "친구 이름, 날씨, 요일, 번호",
+                                    "광고 음악, 포장 소리, 판매자 키, 간판 크기"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "물건을 선택할 때는 가격, 품질, 디자인, 서비스 등 여러 기준을 고려할 수 있습니다."
+            },
+            {
+                        "id": 11,
+                        "level": "normal",
+                        "title": "정보 찾기",
+                        "text": "사려는 물건에 대해 찾아보아야 할 정보로 알맞은 것을 고르세요.",
+                        "options": [
+                                    "가격과 특징, 장단점",
+                                    "판매자의 생일",
+                                    "가게 벽지 색깔",
+                                    "광고의 배경 음악"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "사려는 물건의 가격, 특징, 장단점 등을 찾아보면 합리적 선택에 도움이 됩니다."
+            },
+            {
+                        "id": 12,
+                        "level": "normal",
+                        "title": "가격 비교",
+                        "text": "물건을 살 때 가격이 적당한지, 더 싸게 파는 곳은 없는지 살펴보는 활동을 무엇이라고 할 수 있을까요?",
+                        "options": [
+                                    "비교하기",
+                                    "숨기기",
+                                    "미루기",
+                                    "따라 하기"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "여러 판매처의 가격을 비교하면 한정된 돈을 절약할 수 있습니다."
+            },
+            {
+                        "id": 13,
+                        "level": "normal",
+                        "title": "주변 사람에게 묻기",
+                        "text": "물건을 살 때 필요한 정보를 얻는 방법으로 알맞은 것은 무엇일까요?",
+                        "options": [
+                                    "물건을 사용해 본 주변 사람에게 물어본다",
+                                    "아무 정보도 보지 않고 바로 산다",
+                                    "가격표를 일부러 보지 않는다",
+                                    "가장 먼저 보이는 것만 산다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "물건을 사용해 본 주변 사람에게 물어보면 실제 사용 경험을 바탕으로 정보를 얻을 수 있습니다."
+            },
+            {
+                        "id": 14,
+                        "level": "normal",
+                        "title": "인터넷과 광고 활용",
+                        "text": "인터넷이나 광고를 활용할 때 얻을 수 있는 정보로 가장 알맞은 것은 무엇일까요?",
+                        "options": [
+                                    "물건의 종류와 가격 비교 정보",
+                                    "친구의 내일 숙제 답",
+                                    "가게의 미래 매출",
+                                    "내가 무조건 만족할 것이라는 보장"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "인터넷이나 광고를 활용하면 물건의 종류와 가격을 비교해 볼 수 있습니다."
+            },
+            {
+                        "id": 15,
+                        "level": "normal",
+                        "title": "가게 방문",
+                        "text": "가게를 방문하여 정보를 얻는 방법으로 알맞은 것은 무엇일까요?",
+                        "options": [
+                                    "물건을 직접 살펴보고 궁금한 정보를 물어본다",
+                                    "물건을 보지 않고 계산만 한다",
+                                    "무조건 가장 앞에 있는 물건을 산다",
+                                    "판매자의 말은 모두 틀렸다고 생각한다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "가게에 직접 가면 물건을 살펴보고 궁금한 점을 물어볼 수 있습니다."
+            },
+            {
+                        "id": 16,
+                        "level": "normal",
+                        "title": "정보의 출처",
+                        "text": "물건을 살 때 정보의 출처를 확인해야 하는 까닭으로 알맞은 것은 무엇일까요?",
+                        "options": [
+                                    "믿을 만하고 정확한 정보인지 확인하기 위해서",
+                                    "모든 광고를 외우기 위해서",
+                                    "가격을 일부러 높이기 위해서",
+                                    "물건을 늦게 사기 위해서"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "정보의 출처가 믿을 만한지, 정보가 정확한지 확인하는 것이 중요합니다."
+            },
+            {
+                        "id": 17,
+                        "level": "challenge",
+                        "title": "우선순위 판단",
+                        "text": "민지는 새 필통을 고르려고 합니다. 민지가 정한 우선순위가 '튼튼함 > 가격 > 디자인'일 때 가장 합리적인 선택은 무엇일까요?",
+                        "options": [
+                                    "튼튼하고 예산 안에 있으며 디자인도 무난한 필통",
+                                    "가장 예쁘지만 쉽게 망가지고 예산을 넘는 필통",
+                                    "친구가 샀다는 이유만으로 고른 필통",
+                                    "광고가 재미있어서 고른 필통"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "선택 기준의 우선순위가 튼튼함, 가격, 디자인 순서이므로 튼튼하고 예산 안에 있는 물건이 더 합리적입니다."
+            },
+            {
+                        "id": 18,
+                        "level": "challenge",
+                        "title": "희소성 사례",
+                        "text": "다음 중 자원의 희소성이 잘 드러나는 상황은 무엇일까요?",
+                        "options": [
+                                    "학급 예산이 3만 원이라 모든 준비물을 다 살 수 없다",
+                                    "연필이 너무 많아서 모두에게 충분히 나누어 주고도 남는다",
+                                    "시간이 끝없이 많아서 하고 싶은 일을 모두 할 수 있다",
+                                    "운동장이 무한히 넓어 모든 반이 동시에 사용할 수 있다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "예산이 한정되어 모든 것을 살 수 없다면 자원의 희소성 때문에 선택이 필요합니다."
+            },
+            {
+                        "id": 19,
+                        "level": "challenge",
+                        "title": "선택의 문제 상황",
+                        "text": "학급에서 체육 시간에 사용할 공을 사려고 합니다. 예산이 부족해 축구공과 피구공을 모두 살 수 없습니다. 이때 생기는 문제는 무엇일까요?",
+                        "options": [
+                                    "선택의 문제",
+                                    "날씨의 문제",
+                                    "글쓰기의 문제",
+                                    "교통의 문제"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "자원이 부족해 여러 대안 중 하나를 골라야 하므로 선택의 문제가 생깁니다."
+            },
+            {
+                        "id": 20,
+                        "level": "challenge",
+                        "title": "합리적 구매 과정",
+                        "text": "다음 중 물건을 합리적으로 사는 순서로 가장 알맞은 것은 무엇일까요?",
+                        "options": [
+                                    "필요 확인 → 기준 세우기 → 정보 찾기 → 비교하기 → 선택하기",
+                                    "광고 보기 → 바로 사기 → 후회하기 → 기준 세우기 → 정보 찾기",
+                                    "친구 따라 사기 → 가격 보기 → 필요 확인 → 비교하기 → 버리기",
+                                    "가게 가기 → 눈에 띄는 것 사기 → 이유 만들기 → 정보 찾기"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "먼저 필요한지 확인하고, 선택 기준을 세운 뒤 정보를 찾고 비교하여 선택하는 과정이 합리적입니다."
+            },
+            {
+                        "id": 21,
+                        "level": "challenge",
+                        "title": "광고 정보 판단",
+                        "text": "어떤 장난감 광고에 '최고의 인기 상품'이라고만 적혀 있습니다. 합리적 선택을 위해 가장 알맞은 행동은 무엇일까요?",
+                        "options": [
+                                    "다른 정보와 사용 후기를 함께 확인한다",
+                                    "광고 문구만 믿고 바로 산다",
+                                    "가격은 보지 않는다",
+                                    "필요 없는 물건이어도 무조건 산다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "광고는 유용한 정보가 될 수 있지만, 출처와 정확성을 확인하고 다른 정보와 비교해야 합니다."
+            },
+            {
+                        "id": 22,
+                        "level": "challenge",
+                        "title": "비용과 만족감",
+                        "text": "다음 중 합리적 선택에 가장 가까운 것은 무엇일까요?",
+                        "options": [
+                                    "예산 안에서 꼭 필요하고 만족감이 큰 물건을 고른다",
+                                    "가장 비싼 물건을 고르면 항상 합리적이다",
+                                    "가격이 싸면 필요 없어도 많이 산다",
+                                    "고민하지 않고 가장 먼저 보이는 물건을 산다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "합리적 선택은 비용과 노력에 비해 얻는 만족감을 함께 생각해야 합니다."
+            },
+            {
+                        "id": 23,
+                        "level": "challenge",
+                        "title": "사람마다 다른 기준",
+                        "text": "같은 신발을 고를 때 지민이는 가격을, 하늘이는 디자인을 더 중요하게 생각했습니다. 이를 통해 알 수 있는 것은 무엇일까요?",
+                        "options": [
+                                    "선택 기준의 우선순위는 사람마다 다를 수 있다",
+                                    "모든 사람의 선택 기준은 반드시 같다",
+                                    "디자인은 선택 기준이 될 수 없다",
+                                    "가격은 비교하지 않아도 된다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "사람마다 중요하게 생각하는 기준이 다르기 때문에 우선순위도 달라질 수 있습니다."
+            },
+            {
+                        "id": 24,
+                        "level": "challenge",
+                        "title": "필요와 욕구 구분",
+                        "text": "수현이는 이미 물병이 있지만 새 캐릭터 물병이 갖고 싶습니다. 합리적 선택을 위해 가장 먼저 할 질문은 무엇일까요?",
+                        "options": [
+                                    "정말 필요한 물건인가?",
+                                    "색깔이 가장 튀는가?",
+                                    "친구가 부러워할까?",
+                                    "광고 모델이 누구인가?"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "물건을 사기 전에는 나에게 꼭 필요한 물건인지 먼저 생각해야 합니다."
+            },
+            {
+                        "id": 25,
+                        "level": "challenge",
+                        "title": "정보 출처 비교",
+                        "text": "다음 중 물건 정보를 더 믿을 만하게 확인한 학생은 누구일까요?",
+                        "options": [
+                                    "여러 가게 가격, 사용 후기, 제품 설명을 함께 비교한 학생",
+                                    "한 광고 문구만 보고 바로 산 학생",
+                                    "친구가 멋있다고 해서 바로 산 학생",
+                                    "포장지가 예뻐서 내용은 보지 않은 학생"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "여러 출처의 정보를 비교하면 더 정확하고 믿을 만한 판단을 할 수 있습니다."
+            },
+            {
+                        "id": 26,
+                        "level": "challenge",
+                        "title": "서비스 기준",
+                        "text": "물건을 선택할 때 '서비스'를 기준으로 본 사례로 알맞은 것은 무엇일까요?",
+                        "options": [
+                                    "고장이 났을 때 수리를 받을 수 있는지 확인한다",
+                                    "포장지 색깔만 본다",
+                                    "친구가 좋아하는 색인지 본다",
+                                    "가게 앞 간판의 크기만 본다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "서비스에는 교환, 환불, 수리, 친절한 안내처럼 물건을 산 뒤 받는 도움도 포함될 수 있습니다."
+            },
+            {
+                        "id": 27,
+                        "level": "challenge",
+                        "title": "최종 선택 미션",
+                        "text": "학급 발표 준비물로 색종이를 사야 합니다. A는 2,000원이고 양이 적으며, B는 2,500원이고 양이 충분하며 품질도 좋습니다. 예산이 3,000원이라면 가장 합리적인 선택은 무엇일까요?",
+                        "options": [
+                                    "B를 산다. 예산 안에서 필요량과 품질을 만족하기 때문이다",
+                                    "A를 산다. 무조건 가장 싼 것이 합리적이기 때문이다",
+                                    "둘 다 산다. 예산을 넘겨도 상관없기 때문이다",
+                                    "아무것도 사지 않는다. 발표 준비는 필요 없기 때문이다"
+                        ],
+                        "correctIdx": 0,
+                        "desc": "가격뿐 아니라 필요한 양과 품질, 예산을 함께 고려해야 합리적인 선택이 됩니다."
+            }
+];
+
+        // --- MAP LAYOUT DATA ---
+        const boardLayout = [
+            {
+                        "index": 0,
+                        "type": "start",
+                        "label": "출발"
+            },
+            {
+                        "index": 1,
+                        "type": "normal",
+                        "label": "생활 속 경제활동"
+            },
+            {
+                        "index": 2,
+                        "type": "normal",
+                        "label": "필요 확인 길"
+            },
+            {
+                        "index": 3,
+                        "type": "item",
+                        "label": "정보상자"
+            },
+            {
+                        "index": 4,
+                        "type": "normal",
+                        "label": "희소성 고개"
+            },
+            {
+                        "index": 5,
+                        "type": "trap",
+                        "label": "충동구매 함정"
+            },
+            {
+                        "index": 6,
+                        "type": "challenge",
+                        "label": "선택의 문제 비석"
+            },
+            {
+                        "index": 7,
+                        "type": "normal",
+                        "label": "합리적 선택 길"
+            },
+            {
+                        "index": 8,
+                        "type": "rest",
+                        "label": "소비자 쉼터"
+            },
+            {
+                        "index": 9,
+                        "type": "normal",
+                        "label": "비용과 만족 골짜기"
+            },
+            {
+                        "index": 10,
+                        "type": "item",
+                        "label": "정보상자"
+            },
+            {
+                        "index": 11,
+                        "type": "challenge",
+                        "label": "기준 세우기 탑"
+            },
+            {
+                        "index": 12,
+                        "type": "trap",
+                        "label": "광고 함정"
+            },
+            {
+                        "index": 13,
+                        "type": "normal",
+                        "label": "가격 비교 시장"
+            },
+            {
+                        "index": 14,
+                        "type": "normal",
+                        "label": "품질 확인 다리"
+            },
+            {
+                        "index": 15,
+                        "type": "rest",
+                        "label": "절약 쉼터"
+            },
+            {
+                        "index": 16,
+                        "type": "challenge",
+                        "label": "우선순위 성전"
+            },
+            {
+                        "index": 17,
+                        "type": "item",
+                        "label": "정보상자"
+            },
+            {
+                        "index": 18,
+                        "type": "normal",
+                        "label": "가게 방문 길"
+            },
+            {
+                        "index": 19,
+                        "type": "trap",
+                        "label": "출처 불명 함정"
+            },
+            {
+                        "index": 20,
+                        "type": "challenge",
+                        "label": "최종 선택 관문"
+            },
+            {
+                        "index": 21,
+                        "type": "normal",
+                        "label": "서비스 비교로"
+            },
+            {
+                        "index": 22,
+                        "type": "boss",
+                        "label": "선택왕 관문"
+            },
+            {
+                        "index": 23,
+                        "type": "goal",
+                        "label": "합리적 선택 도착"
+            }
+];
+
+        // --- PLAYER CONFIG & STATE ---
+        let players = [];
+        let currentPlayerIdx = 0;
+        let playerCount = 4;
+        let gameTimerInterval = null;
+        let questionTimerInterval = null;
+        let totalSeconds = 1800; // 30분
+        let diceValue = 1;
+        let isRolling = false;
+        let currentProblem = null;
+        let currentProblemTileIdx = null;
+
+        const avatars = [
+            { icon: "fa-magnifying-glass-chart", color: "from-blue-500 to-indigo-600", bg: "bg-blue-500", name: "희소성 탐정" },
+            { icon: "fa-scale-balanced", color: "from-purple-500 to-pink-600", bg: "bg-purple-500", name: "선택 기준 분석가" },
+            { icon: "fa-store", color: "from-emerald-500 to-teal-600", bg: "bg-emerald-500", name: "정보 조사원" },
+            { icon: "fa-list-check", color: "from-amber-500 to-orange-600", bg: "bg-amber-500", name: "우선순위 전략가" }
+        ];
+
+        // --- CANVAS SETUP ---
+        let canvas, ctx;
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+
+        window.onload = function() {
+            setPlayerCount(4);
+            initDialogEscClose();
+        }
+
+        // --- GAME SETTING SCREENS ---
+        function setPlayerCount(count) {
+            playerCount = 4;
+
+            // 인풋 필드 동적 생성
+            const container = document.getElementById("player-inputs");
+            container.innerHTML = "";
+
+            for (let i = 0; i < playerCount; i++) {
+                const pName = `탐험가 ${i + 1}`;
+                const avatar = avatars[i];
+                container.innerHTML += `
+                    <div class="bg-slate-850 border border-slate-750 p-4 rounded-xl flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr ${avatar.color} flex items-center justify-center text-white text-2xl shadow-inner">
+                            <i class="fa-solid ${avatar.icon}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-xs font-bold text-slate-400">${avatar.name}</span>
+                            <input type="text" id="player-name-${i}" value="${pName}" maxLength="6" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 mt-1">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // --- START GAME ---
+        function startGame() {
+            players = [];
+            for (let i = 0; i < playerCount; i++) {
+                const nameInput = document.getElementById(`player-name-${i}`);
+                let name = nameInput.value.trim();
+                if (!name) name = `탐험가 ${i + 1}`;
+                
+                players.push({
+                    id: i,
+                    name: name,
+                    avatar: avatars[i],
+                    position: 0,
+                    crystals: 100, // 시작 점수
+                    items: {
+                        potion: 1, // 정보 돋보기: 1개
+                        shield: 1, // 비교 보호막: 1개
+                        dice: 0    // 우선순위 주사위: 0개
+                    },
+                    effect: null // 특별 효과 버프/너프
+                });
+            }
+
+            currentPlayerIdx = 0;
+            document.getElementById("setup-screen").classList.add("hidden");
+            document.getElementById("game-screen").classList.remove("hidden");
+
+            // 타이머 작동
+            startGlobalTimer();
+
+            // 맵 그리기 및 렌더링
+            renderBoard();
+            updateScoreboard();
+            updateActivePlayer();
+
+            // 첫 유저 대기 알림
+            showTurnWelcomeModal();
+        }
+
+        // --- GLOBAL TIME COUNTDOWN (30 MINS) ---
+        function startGlobalTimer() {
+            if (gameTimerInterval) clearInterval(gameTimerInterval);
+            totalSeconds = 1800; // 30분
+            
+            gameTimerInterval = setInterval(() => {
+                totalSeconds--;
+                if (totalSeconds <= 0) {
+                    clearInterval(gameTimerInterval);
+                    endGame();
+                }
+                
+                const mins = Math.floor(totalSeconds / 60);
+                const secs = totalSeconds % 60;
+                document.getElementById("global-timer").innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }, 1000);
+        }
+
+        // --- RENDER GAME BOARD (S-Shape Snake Map Grid) ---
+        function renderBoard() {
+            const grid = document.getElementById("board-grid");
+            grid.innerHTML = "";
+
+            // 6열 x 4행 구조
+            // Row 0: 0, 1, 2, 3, 4, 5
+            // Row 1: 11, 10, 9, 8, 7, 6 (Reversed)
+            // Row 2: 12, 13, 14, 15, 16, 17
+            // Row 3: 23, 22, 21, 20, 19, 18 (Reversed)
+            const rows = [
+                [0, 1, 2, 3, 4, 5],
+                [11, 10, 9, 8, 7, 6],
+                [12, 13, 14, 15, 16, 17],
+                [23, 22, 21, 20, 19, 18]
+            ];
+
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 6; c++) {
+                    const tileIdx = rows[r][c];
+                    const tile = boardLayout[tileIdx];
+                    
+                    // 스타일 매칭
+                    let bgStyle = "bg-slate-800 border-slate-700 text-slate-300";
+                    let badgeStyle = "bg-slate-900/80 text-slate-400";
+                    
+                    if (tile.type === "start") {
+                        bgStyle = "bg-gradient-to-br from-blue-900 to-slate-800 border-blue-500 text-blue-200";
+                        badgeStyle = "bg-blue-600 text-white";
+                    } else if (tile.type === "goal") {
+                        bgStyle = "bg-gradient-to-br from-amber-600/40 to-slate-800 border-amber-400 text-amber-200 animate-pulse";
+                        badgeStyle = "bg-amber-500 text-slate-950 font-bold";
+                    } else if (tile.type === "normal") {
+                        bgStyle = "bg-slate-800/80 border-slate-700/80 text-slate-300 hover:bg-slate-750";
+                        badgeStyle = "bg-cyan-900/50 text-cyan-300 border border-cyan-800/30";
+                    } else if (tile.type === "challenge" || tile.type === "boss") {
+                        bgStyle = "bg-violet-950/40 border-violet-700 text-violet-200 hover:bg-violet-950/60";
+                        badgeStyle = "bg-violet-600 text-white";
+                    } else if (tile.type === "item") {
+                        bgStyle = "bg-amber-950/20 border-amber-600/50 text-amber-300 hover:bg-amber-950/30";
+                        badgeStyle = "bg-amber-500 text-slate-950";
+                    } else if (tile.type === "trap") {
+                        bgStyle = "bg-rose-950/30 border-rose-800 text-rose-300 hover:bg-rose-950/50";
+                        badgeStyle = "bg-rose-600 text-white";
+                    } else if (tile.type === "rest") {
+                        bgStyle = "bg-emerald-950/20 border-emerald-700 text-emerald-300 hover:bg-emerald-950/30";
+                        badgeStyle = "bg-emerald-600 text-white";
+                    }
+
+                    // 해당 칸에 정착해있는 탐험가 수집
+                    let tokensHtml = "";
+                    players.forEach(p => {
+                        if (p.position === tileIdx) {
+                            tokensHtml += `
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-tr ${p.avatar.color} border border-white text-white flex items-center justify-center text-xs shadow-md transform hover:scale-110 transition cursor-help" title="${p.name}">
+                                    <i class="fa-solid ${p.avatar.icon}"></i>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    grid.innerHTML += `
+                        <div class="relative min-h-[75px] sm:min-h-[90px] border-2 rounded-xl p-2 flex flex-col justify-between transition-all duration-300 ${bgStyle}">
+                            <div class="flex justify-between items-start">
+                                <span class="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-md font-bold ${badgeStyle}">${tile.label}</span>
+                                <span class="text-[9px] sm:text-[10px] text-slate-500 font-mono">#${tile.index}</span>
+                            </div>
+                            
+                            <!-- 탐험가 토큰이 표시되는 바닥 라인 -->
+                            <div class="flex flex-wrap gap-1 mt-1 z-10">
+                                ${tokensHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // --- UPDATE SIDEBAR SCOREBOARD ---
+        function updateScoreboard() {
+            const container = document.getElementById("scoreboard-list");
+            container.innerHTML = "";
+
+            // 스코어 순 정렬이 아닌 플레이어 순서대로 노출해 오프라인 편의성 강화
+            players.forEach(p => {
+                const currentTile = boardLayout[p.position];
+                container.innerHTML += `
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 flex justify-between items-center">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr ${p.avatar.color} text-white flex items-center justify-center text-sm shadow">
+                                <i class="fa-solid ${p.avatar.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-200">${p.name}</h4>
+                                <p class="text-[10px] text-slate-400">위치: ${currentTile.label} (${p.position}칸)</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400">보유 선택 토큰</span>
+                            <div class="text-sm font-bold text-cyan-400 font-mono"><i class="fa-solid fa-gem text-xs mr-1"></i>${p.crystals}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- UPDATE CURRENT ACTIVE PLAYER CONTROL PANEL ---
+        function updateActivePlayer() {
+            const p = players[currentPlayerIdx];
+            const container = document.getElementById("active-player-panel");
+            
+            // 효과 뱃지 생성
+            let effectBadge = "";
+            if (p.effect === "slow") {
+                effectBadge = `<span class="bg-rose-950 border border-rose-800 text-rose-300 text-[10px] px-2 py-0.5 rounded-full">주사위 절반 효과</span>`;
+            } else if (p.effect === "double") {
+                effectBadge = `<span class="bg-amber-950 border border-amber-800 text-amber-300 text-[10px] px-2 py-0.5 rounded-full">선택 토큰 2배 부스터</span>`;
+            } else {
+                effectBadge = `<span class="bg-slate-900 text-slate-400 text-[10px] px-2 py-0.5 rounded-full border border-slate-700">컨디션 좋음</span>`;
+            }
+
+            container.innerHTML = `
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr ${p.avatar.color} text-white flex items-center justify-center text-3xl shadow-lg ring-4 ring-cyan-500/30">
+                    <i class="fa-solid ${p.avatar.icon}"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <h4 class="text-2xl font-jua text-white">${p.name}</h4>
+                        ${effectBadge}
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">인벤토리: 
+                        <span class="text-amber-400 mr-2"><i class="fa-solid fa-flask"></i> 정보돋보기:${p.items.potion}</span>
+                        <span class="text-blue-400 mr-2"><i class="fa-solid fa-shield-halved"></i> 보호막:${p.items.shield}</span>
+                        <span class="text-yellow-400"><i class="fa-solid fa-dice"></i> 우선순위주사위:${p.items.dice}</span>
+                    </p>
+                </div>
+            `;
+            
+            // 우선순위 주사위 소유 여부에 따라 주사위 이미지 버튼 효과 변경
+            const diceVisual = document.getElementById("dice-visual");
+            if (p.items.dice > 0) {
+                diceVisual.className = "w-16 h-16 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex items-center justify-center text-slate-950 text-3xl font-bold shadow-lg shadow-yellow-500/30 cursor-pointer animate-bounce";
+                diceVisual.onclick = () => useGoldenDice();
+                diceVisual.innerHTML = `<i class="fa-solid fa-crown"></i>`;
+            } else {
+                diceVisual.className = "w-16 h-16 bg-gradient-to-br from-cyan-400 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-indigo-500/20 cursor-not-allowed";
+                diceVisual.onclick = null;
+                diceVisual.innerHTML = `<i class="fa-solid fa-dice-d6"></i>`;
+            }
+        }
+
+        // --- TURN WELCOME MODAL ---
+        function showTurnWelcomeModal() {
+            const p = players[currentPlayerIdx];
+            showDialog(
+                `fa-user-ninja text-cyan-400`,
+                `${p.name}의 모험 차례`,
+                `웨일북을 ${p.name}에게 넘겨주세요!\n준비가 되었다면 주사위를 굴리세요.`,
+                "출발하기"
+            );
+        }
+
+        // --- USE GOLDEN DICE ---
+        function useGoldenDice() {
+            const p = players[currentPlayerIdx];
+            if (p.items.dice <= 0) return;
+            
+            p.items.dice--;
+            sound.playItem();
+            showDialog(
+                "fa-dice-six text-amber-400",
+                "우선순위 주사위 발동",
+                "우선순위주사위 효과로 무조건 4칸을 전진합니다!",
+                "전진 개시",
+                () => {
+                    executeMove(4);
+                }
+            );
+        }
+
+        // --- DICE ROLLING ---
+        function rollDice() {
+            if (isRolling) return;
+            isRolling = true;
+            sound.playDice();
+
+            // 주사위 롤 오버레이 노출
+            const overlay = document.getElementById("dice-rolling-overlay");
+            const rollingText = document.getElementById("rolling-text");
+            overlay.classList.remove("hidden");
+
+            let rollsCount = 0;
+            const diceIcons = ["fa-dice-one", "fa-dice-two", "fa-dice-three", "fa-dice-four"];
+            
+            const rollInterval = setInterval(() => {
+                const tempNum = Math.floor(Math.random() * 4) + 1;
+                rollingText.innerHTML = `
+                    <div class="text-5xl my-2"><i class="fa-solid ${diceIcons[tempNum-1]}"></i></div>
+                    주사위가 회전합니다... [${tempNum}]
+                `;
+                rollsCount++;
+                if (rollsCount > 10) {
+                    clearInterval(rollInterval);
+                    overlay.classList.add("hidden");
+
+                    // 실제 계산
+                    let resultRoll = Math.floor(Math.random() * 4) + 1; // 1 ~ 4 이동
+                    const p = players[currentPlayerIdx];
+                    
+                    // 디버프 적용 (Slow일 때 결과 절반, 최소 1)
+                    if (p.effect === "slow") {
+                        resultRoll = Math.max(1, Math.floor(resultRoll / 2));
+                        p.effect = null; // 디버프 해제
+                    }
+
+                    showDialog(
+                        "fa-cube text-indigo-400",
+                        "주사위 결과",
+                        `${p.name}님이 주사위 ${resultRoll}을(를) 던졌습니다!`,
+                        "이동하기",
+                        () => {
+                            isRolling = false;
+                            executeMove(resultRoll);
+                        }
+                    );
+                }
+            }, 100);
+        }
+
+        // --- EXECUTE MOVE STEP BY STEP ---
+        function executeMove(steps) {
+            const p = players[currentPlayerIdx];
+            let targetPosition = p.position + steps;
+            
+            // 완주 체크
+            if (targetPosition >= 23) {
+                targetPosition = 23; // 골 포탈 고정
+            }
+
+            p.position = targetPosition;
+            renderBoard();
+            updateScoreboard();
+            updateActivePlayer();
+
+            // 정착한 타일 이벤트 처리
+            setTimeout(() => {
+                handleTileEvent(targetPosition);
+            }, 600);
+        }
+
+        // --- TILE EVENT ROUTER ---
+        function handleTileEvent(tileIdx) {
+            const tile = boardLayout[tileIdx];
+            const p = players[currentPlayerIdx];
+
+            if (tile.type === "start") {
+                nextTurn();
+            } else if (tile.type === "normal" || tile.type === "challenge" || tile.type === "boss") {
+                // 문제 은행에서 적절한 수준의 문제 드로우
+                drawProblem(tile.type, tileIdx);
+            } else if (tile.type === "item") {
+                // 보물상자 보상 랜덤 지급
+                const itemTypes = ["potion", "shield", "dice"];
+                const rewardItem = itemTypes[Math.floor(Math.random() * itemTypes.length)];
+                
+                let itemName = "";
+                if (rewardItem === "potion") {
+                    p.items.potion++;
+                    itemName = "정보 돋보기 (선택지 1개 제외)";
+                } else if (rewardItem === "shield") {
+                    p.items.shield++;
+                    itemName = "비교 보호막 (오답 시 뒤로 가기 차단)";
+                } else if (rewardItem === "dice") {
+                    p.items.dice++;
+                    itemName = "우선순위 주사위 (고정 4칸 돌진)";
+                }
+
+                sound.playItem();
+                showDialog(
+                    "fa-gift text-amber-400 animate-bounce",
+                    "숨겨진 보물상자 발견",
+                    `${p.name}님이 신비로운 정보 보물상자에서\n[${itemName}]을(를) 획득했습니다!`,
+                    "감사합니다",
+                    () => {
+                        nextTurn();
+                    }
+                );
+            } else if (tile.type === "rest") {
+                // 온천/정령 쉼터 버프
+                p.crystals += 30;
+                p.effect = "double"; // 다음 차례에 2배 획득 버프 제공
+                sound.playItem();
+                showDialog(
+                    "fa-mug-hot text-emerald-400",
+                    "소비자 쉼터 휴식",
+                    `${p.name}님이 쉼터에서 생각을 정리하고 선택 토큰 +30개를 얻었습니다.\n다음 번 정답 시 획득하는 점수가 2배가 됩니다!`,
+                    "에너지 충전 완료",
+                    () => {
+                        nextTurn();
+                    }
+                );
+            } else if (tile.type === "trap") {
+                // 함정 발동
+                if (p.items.shield > 0) {
+                    // 실드로 탈출 가능 여부 확인
+                    showDialog(
+                        "fa-shield-halved text-blue-400",
+                        "함정 발견 & 방어 작동",
+                        `모래지옥/낙석 위험이 감지되었습니다!\n소지하고 계신 [비교 보호막]을 사용하여 안전하게 무시할까요?`,
+                        "보호막 사용",
+                        () => {
+                            p.items.shield--;
+                            sound.playItem();
+                            updateActivePlayer();
+                            nextTurn();
+                        },
+                        "그냥 당하기",
+                        () => {
+                            triggerTrapEffect(p);
+                        }
+                    );
+                } else {
+                    triggerTrapEffect(p);
+                }
+            } else if (tile.type === "goal") {
+                // 포탈 도착 완주 보상
+                p.crystals += 150;
+                sound.playSuccess();
+                showDialog(
+                    "fa-door-open text-amber-400",
+                    "합리적 선택 도착!",
+                    `${p.name}님이 마침내 경제활동 미션을 통과하고 합리적 선택 도착점에 도착했습니다!\n완주 보너스로 선택 토큰 +150개를 즉시 받습니다!\n다른 탐험가들을 위해 시상식을 시작합니다.`,
+                    "선택 리포트 보기",
+                    () => {
+                        endGame();
+                    }
+                );
+            }
+        }
+
+        // --- TRIGGER TRAP EFFECT ---
+        function triggerTrapEffect(p) {
+            p.crystals = Math.max(0, p.crystals - 30);
+            p.effect = "slow"; // 다음 주사위 절반 디버프
+            sound.playFailure();
+            showDialog(
+                "fa-skull-crossbones text-rose-500 animate-shake",
+                "충동 선택 함정 돌입",
+                `${p.name}님이 함정에 빠져 마력을 일부 잃었습니다!\n선택 토큰 -30개 차감 & 다음 차례 주사위 전진 수 절반 감소 너프 적용`,
+                "눈물 흘리기",
+                () => {
+                    nextTurn();
+                }
+            );
+        }
+
+        // --- DRAW PROBLEM FROM THE MATH BANK ---
+        function drawProblem(tileType, tileIdx) {
+            currentProblemTileIdx = tileIdx;
+            
+            // 필터링
+            let candidates = questionBank.filter(q => q.level === (tileType === "boss" ? "challenge" : tileType));
+            if (candidates.length === 0) candidates = questionBank; // 백업 안전핀
+
+            // 무작위 1개 선택
+            const selected = candidates[Math.floor(Math.random() * candidates.length)];
+            currentProblem = selected;
+
+            // 모달 노출 세팅
+            const modal = document.getElementById("problem-modal");
+            const badge = document.getElementById("problem-badge");
+            const title = document.getElementById("problem-title");
+            const textEl = document.getElementById("problem-text");
+            const timerEl = document.getElementById("question-timer");
+
+            badge.innerText = tileType.toUpperCase();
+            if (tileType === "boss") {
+                badge.className = "bg-purple-600 text-white text-xs font-bold px-2.5 py-1 rounded-full border border-purple-400";
+                title.innerText = "최종 합리적 선택 미션";
+            } else if (tileType === "challenge") {
+                badge.className = "bg-violet-600 text-white text-xs font-bold px-2.5 py-1 rounded-full";
+                title.innerText = `도전 경제활동 문제 (보너스)`;
+            } else {
+                badge.className = "bg-cyan-500 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-full";
+                title.innerText = `일반 경제활동 문제`;
+            }
+
+            // 문제 문자열 분수 가공 렌더링
+            textEl.innerHTML = renderFractionText(selected.text);
+
+            // 보기 렌더링
+            renderOptions(selected.options);
+
+            // 사용 아이템 상태 주입
+            renderItemSelectors();
+
+            // 그림연습장 캔버스 초기화
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                initCanvas();
+            }, 100);
+
+            // 문제 풀이 타이머 작동 (90초)
+            let qTime = 90;
+            timerEl.innerText = `${qTime}초`;
+            if (questionTimerInterval) clearInterval(questionTimerInterval);
+            
+            questionTimerInterval = setInterval(() => {
+                qTime--;
+                timerEl.innerText = `${qTime}초`;
+                if (qTime <= 0) {
+                    clearInterval(questionTimerInterval);
+                    sound.playFailure();
+                    // 타임아웃 오답처리
+                    handleAnswer(null, false, true);
+                }
+            }, 1000);
+        }
+
+        // --- RENDER ANSWER OPTIONS WITH FORMATTING ---
+        function renderOptions(options) {
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+
+            options.forEach((opt, idx) => {
+                const renderedText = renderFractionText(opt);
+                container.innerHTML += `
+                    <button onclick="submitAnswer(${idx})" id="opt-btn-${idx}" class="w-full text-left bg-slate-900 hover:bg-slate-700 border border-slate-700/60 p-4 rounded-xl text-slate-200 hover:text-white transition-all transform active:scale-98 font-semibold flex items-center gap-3">
+                        <span class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs border border-slate-700">${idx + 1}</span>
+                        <div class="flex-1">${renderedText}</div>
+                    </button>
+                `;
+            });
+        }
+
+        // --- RENDER AVAILABLE ITEMS IN MODAL ---
+        function renderItemSelectors() {
+            const p = players[currentPlayerIdx];
+            const container = document.getElementById("use-item-container");
+            container.innerHTML = "";
+
+            // 정보 돋보기
+            const hasPotion = p.items.potion > 0;
+            container.innerHTML += `
+                <button onclick="usePotionInQuiz()" ${!hasPotion ? 'disabled' : ''} class="px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${hasPotion ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30' : 'bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed'}">
+                    <i class="fa-solid fa-flask"></i>정보 돋보기 사용하기 (남음: ${p.items.potion}개)
+                </button>
+            `;
+
+            // 보호막 활성 표시
+            if (p.items.shield > 0) {
+                container.innerHTML += `
+                    <span class="px-3 py-2 rounded-lg text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30 flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved"></i>비교 보호막 자동 준비됨 (오답 대비)
+                    </span>
+                `;
+            }
+        }
+
+        // --- USE POTION IN QUIZ ---
+        function usePotionInQuiz() {
+            const p = players[currentPlayerIdx];
+            if (p.items.potion <= 0) return;
+
+            p.items.potion--;
+            sound.playItem();
+            updateActivePlayer();
+            renderItemSelectors();
+
+            // 오답 보기 중 하나를 임의로 찾아서 비활성화시킴
+            const correctIdx = currentProblem.correctIdx;
+            const wrongIndices = [0, 1, 2, 3].filter(i => i !== correctIdx);
+            const targetDisable = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+
+            const badBtn = document.getElementById(`opt-btn-${targetDisable}`);
+            if (badBtn) {
+                badBtn.disabled = true;
+                badBtn.className = "w-full text-left bg-slate-950 text-slate-700 border border-slate-900 p-4 rounded-xl cursor-not-allowed opacity-30 flex items-center gap-3";
+                badBtn.innerHTML += `<span class="ml-auto text-xs font-bold text-rose-500">[정보 확인됨]</span>`;
+            }
+
+            showDialog("fa-wand-magic-sparkles text-amber-400", "정보 돋보기 활성화", "정보 조사력으로 오답 중 한 개를 차단했습니다!", "계속 생각하기");
+        }
+
+        // --- SUBMIT ANSWER CHECK ---
+        function submitAnswer(chosenIdx) {
+            if (questionTimerInterval) clearInterval(questionTimerInterval);
+            
+            const isCorrect = chosenIdx === currentProblem.correctIdx;
+            handleAnswer(chosenIdx, isCorrect, false);
+        }
+
+        // --- HANDLE RESPONSE RESULT ---
+        function handleAnswer(chosenIdx, isCorrect, isTimeout) {
+            const modal = document.getElementById("problem-modal");
+            modal.classList.add("hidden");
+
+            const p = players[currentPlayerIdx];
+            const tile = boardLayout[currentProblemTileIdx];
+
+            // 득점 계산
+            let pointsGained = 50;
+            if (tile.type === "challenge") pointsGained = 100;
+            if (tile.type === "boss") pointsGained = 150;
+
+            // 2배 점수 부스터 보너스 버프 확인
+            if (p.effect === "double" && isCorrect) {
+                pointsGained *= 2;
+                p.effect = null; // 사용 후 해제
+            }
+
+            if (isCorrect) {
+                p.crystals += pointsGained;
+                sound.playSuccess();
+                showDialog(
+                    "fa-circle-check text-emerald-400 animate-bounce",
+                    "정답입니다! 선택 성공",
+                    `${p.name}님이 핵심 개념을 정확히 판단했습니다!\n선택 토큰 +${pointsGained}개를 획득합니다!\n\n해설: ${currentProblem.desc}`,
+                    "다음 차례로",
+                    () => {
+                        nextTurn();
+                    }
+                );
+            } else {
+                // 오답 처리
+                let penaltyText = "선택 토큰 -20개 차감";
+                p.crystals = Math.max(0, p.crystals - 20);
+
+                let backSteps = 1;
+                if (tile.type === "boss") backSteps = 2;
+
+                let shieldActive = false;
+                if (p.items.shield > 0) {
+                    p.items.shield--;
+                    shieldActive = true;
+                }
+
+                if (shieldActive) {
+                    penaltyText += " & [비교 보호막] 소모로 후퇴 피해 무효화!";
+                } else {
+                    p.position = Math.max(0, p.position - backSteps);
+                    penaltyText += ` & 뒤로 ${backSteps}칸 밀려남`;
+                }
+
+                sound.playFailure();
+                
+                const failTitle = isTimeout ? "시간 초과! 선택 지연" : "아쉬운 오답! 판단 실수";
+                const failMessage = isTimeout ? 
+                    `${p.name}님이 선택 제한시간을 넘겼습니다!\n\n${penaltyText}\n\n[정답 설명]\n${currentProblem.desc}` : 
+                    `${p.name}님이 판단 실수를 했습니다!\n\n${penaltyText}\n\n[정답 설명]\n${currentProblem.desc}`;
+
+                showDialog(
+                    "fa-triangle-exclamation text-rose-500 animate-shake",
+                    failTitle,
+                    failMessage,
+                    "다시 확인하기",
+                    () => {
+                        nextTurn();
+                    }
+                );
+            }
+        }
+
+        // --- NEXT TURN HANDLER ---
+        function nextTurn() {
+            renderBoard();
+            updateScoreboard();
+            
+            // 플레이어 번갈아 진행
+            currentPlayerIdx = (currentPlayerIdx + 1) % playerCount;
+            updateActivePlayer();
+
+            // 다음 탐험가 알림
+            setTimeout(() => {
+                showTurnWelcomeModal();
+            }, 400);
+        }
+
+        // --- CONVERT FRACTION STRING INTO BEAUTIFUL HTML ---
+        function renderFractionText(text) {
+            // 대괄호 분수 표기가 있을 경우 보기 좋게 전환하며, 일반 문장은 그대로 출력
+            return text.replace(/(\d+)?\[(\d+)\/(\d+)\]/g, (match, integer, num, den) => {
+                let html = '<span class="inline-flex items-center align-middle mx-1 font-semibold text-slate-100 bg-slate-900/40 px-1 rounded border border-slate-750">';
+                if (integer) {
+                    html += `<span class="text-xl md:text-2xl mr-0.5 text-cyan-400 font-extrabold">${integer}</span>`;
+                }
+                html += `<span class="flex flex-col items-center text-[10px] md:text-xs leading-none">
+                    <span class="border-b border-cyan-500/50 pb-0.5 px-1 text-cyan-300">${num}</span>
+                    <span class="pt-0.5 px-1 text-indigo-300">${den}</span>
+                </span></span>`;
+                return html;
+            });
+        }
+
+        // --- DIGITAL SCRATCHPAD PAINT CANVAS ---
+        function initCanvas() {
+            canvas = document.getElementById("scratchpad-canvas");
+            ctx = canvas.getContext("2d");
+
+            // 디바이스 크기 대응 리사이징
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight || 220;
+
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#1e293b"; // 기본 잉크색 (slate-800)
+
+            // 마우스 이벤트 바인딩
+            canvas.addEventListener("mousedown", startDraw);
+            canvas.addEventListener("mousemove", drawStroke);
+            canvas.addEventListener("mouseup", stopDraw);
+            canvas.addEventListener("mouseout", stopDraw);
+
+            // 태블릿/웨일북 터치 이벤트 바인딩
+            canvas.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent("mousedown", {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }, { passive: false });
+
+            canvas.addEventListener("touchmove", (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent("mousemove", {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }, { passive: false });
+
+            canvas.addEventListener("touchend", (e) => {
+                const mouseEvent = new MouseEvent("mouseup", {});
+                canvas.dispatchEvent(mouseEvent);
+            }, { passive: false });
+        }
+
+        function startDraw(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        }
+
+        function drawStroke(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            lastX = x;
+            lastY = y;
+        }
+
+        function stopDraw() {
+            isDrawing = false;
+        }
+
+        function clearCanvas() {
+            if (ctx && canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function setBrushColor(color) {
+            if (ctx) {
+                ctx.strokeStyle = color;
+            }
+        }
+
+        function setBrushWidth(width) {
+            if (ctx) {
+                ctx.lineWidth = width;
+            }
+        }
+
+        // --- Sleek Custom Dialog Modals (No alerts) ---
+        let dialogCallback = null;
+
+        function showDialog(iconClasses, title, desc, btnText, callback = null, secondaryBtnText = null, secondaryCallback = null) {
+            const overlay = document.getElementById("dialog-overlay");
+            const iconEl = document.getElementById("dialog-icon");
+            const titleEl = document.getElementById("dialog-title");
+            const descEl = document.getElementById("dialog-desc");
+            const primaryBtn = document.getElementById("dialog-btn-primary");
+            const secondaryBtn = document.getElementById("dialog-btn-secondary");
+
+            iconEl.innerHTML = `<i class="fa-solid ${iconClasses}"></i>`;
+            titleEl.innerText = title;
+            descEl.innerHTML = desc;
+            primaryBtn.innerText = btnText;
+
+            // 콜백 저장
+            dialogCallback = callback;
+
+            if (secondaryBtnText) {
+                secondaryBtn.innerText = secondaryBtnText;
+                secondaryBtn.classList.remove("hidden");
+                secondaryBtn.onclick = () => {
+                    overlay.classList.add("hidden");
+                    if (secondaryCallback) secondaryCallback();
+                };
+            } else {
+                secondaryBtn.classList.add("hidden");
+            }
+
+            overlay.classList.remove("hidden");
+        }
+
+        function closeDialog() {
+            document.getElementById("dialog-overlay").classList.add("hidden");
+            if (dialogCallback) {
+                const tempCallback = dialogCallback;
+                dialogCallback = null; // 메모리 해제
+                tempCallback();
+            }
+        }
+
+        function initDialogEscClose() {
+            window.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    const overlay = document.getElementById("dialog-overlay");
+                    if (!overlay.classList.contains("hidden")) {
+                        closeDialog();
+                    }
+                }
+            });
+        }
+
+        function openResetConfirmModal() {
+            showDialog(
+                "fa-triangle-exclamation text-rose-500 animate-pulse",
+                "게임 초기화 확인",
+                "정말로 모든 플레이 데이터와 상태를 초기화하고 처음 인원 설정 화면으로 돌아가시겠습니까?",
+                "초기화 실행",
+                () => {
+                    location.reload();
+                },
+                "취소",
+                () => {}
+            );
+        }
+
+        // --- END GAME & FINAL REPORT ---
+        function endGame() {
+            if (gameTimerInterval) clearInterval(gameTimerInterval);
+            if (questionTimerInterval) clearInterval(questionTimerInterval);
+
+            // 결과 화면 전환
+            document.getElementById("game-screen").classList.add("hidden");
+            document.getElementById("problem-modal").classList.add("hidden");
+            const resultModal = document.getElementById("result-modal");
+            resultModal.classList.remove("hidden");
+
+            // 스코어 순위 산정 정렬
+            const sorted = [...players].sort((a, b) => b.crystals - a.crystals);
+
+            const rankingsContainer = document.getElementById("final-rankings");
+            rankingsContainer.innerHTML = "";
+
+            sorted.forEach((p, idx) => {
+                let badgeClass = "bg-slate-700 text-slate-300";
+                let prizeIcon = `<i class="fa-solid fa-medal text-slate-500 mr-2"></i>`;
+                
+                if (idx === 0) {
+                    badgeClass = "bg-amber-500 text-slate-950 font-bold scale-105 ring-4 ring-amber-500/30";
+                    prizeIcon = `<i class="fa-solid fa-trophy text-amber-400 mr-2 animate-pulse"></i>`;
+                } else if (idx === 1) {
+                    badgeClass = "bg-slate-300 text-slate-950 font-bold";
+                    prizeIcon = `<i class="fa-solid fa-medal text-slate-400 mr-2"></i>`;
+                } else if (idx === 2) {
+                    badgeClass = "bg-amber-700 text-white font-bold";
+                    prizeIcon = `<i class="fa-solid fa-medal text-amber-700 mr-2"></i>`;
+                }
+
+                rankingsContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-4 rounded-2xl border border-slate-700 bg-slate-900/60 ${idx === 0 ? 'border-amber-500/50' : ''}">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${badgeClass}">
+                                ${idx + 1}
+                            </span>
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr ${p.avatar.color} text-white flex items-center justify-center text-sm shadow">
+                                <i class="fa-solid ${p.avatar.icon}"></i>
+                            </div>
+                            <span class="font-bold text-white text-base">${p.name}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 font-mono text-base font-bold text-cyan-400">
+                            ${prizeIcon}
+                            ${p.crystals}개
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
